@@ -11,7 +11,13 @@ Read::Read( QString in, QString out )
         this->Dir = out;
     else
     {
-
+        QDir dir(in);
+        QString aux = dir.dirName();
+        qDebug() << "Dir " << aux;
+        qDebug() << "Todo " << in;
+        in.remove( in.size()-aux.size(), aux.size() );
+        qDebug() << "Apos " << in;
+        this->Dir = in;
     }
 }
 bool Read::OpenFileCod(QString dir)
@@ -24,11 +30,19 @@ bool Read::OpenFileCod(QString dir)
     }
     QDir Dir(dir);
     this->Name = Dir.dirName();
+    dir.remove( dir.size()-this->Name.size(), this->Name.size() );
+    this->Dir = dir;
     if( !dir.compare(this->Name_out) )
     {
-        this->Name_out = this->Name;
-        while( QString::compare(".", this->Name_out.at(this->Name_out.size() -1) ) )  this->Name_out.chop(1);
-        this->Name_out += "huff";
+         Name_out = Dir.dirName();
+         for (int i = Name_out.size()-1; i >= 0  ; --i)
+         {
+            if( !QString::compare(Name_out.at(i),"." ) )
+            {
+                Name_out.chop( Name_out.size() - i);
+                Name_out += "huff";
+            }
+         }
     }
     while(!File->atEnd() )
     {
@@ -110,7 +124,8 @@ void Read::BuildFile(QByteArray Rep)
     FileOut.append(this->Name).append(Rep).append(FileByte);
     qDebug() << this->Name;
     qDebug() << this->Name_out;
-    QFile NewFile(this->Name_out);
+    qDebug() << this->Dir;
+    QFile NewFile( this->Name_out);
     if(!NewFile.open(QIODevice::WriteOnly)){
         qDebug() << "Ocorreu um erro ao abrir o arquivo da compressão.";
         exit(1);
